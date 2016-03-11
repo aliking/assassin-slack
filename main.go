@@ -65,6 +65,7 @@ func readAnonymousMessage(r *http.Request) string {
 	if err != nil {
 		return "Failed to send message."
 	}
+	return fmt.Sprintf("Posted secretly to %s", slackchannel)
 }
 
 // sendAnonymousMessage uses an incoming hook to Direct Message
@@ -80,7 +81,6 @@ func sendAnonymousMessage(username, message string) error {
 		name = "Civilian"
 	}
 
-	fmt.Println("%s %s", icon, name)
 	payload, err := json.Marshal(slackMsg{
 		Text:      message,
 		Channel:   slackchannel,
