@@ -5,12 +5,10 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"math/rand"
+	"io/ioutil"
 	"net/http"
 	"os"
-	"regexp"
 	"strings"
-	"time"
 )
 
 const (
@@ -20,34 +18,29 @@ const (
 	// (See: https://api.slack.com/slash-commands)
 	keyToken       = "token"
 	keyTeamID      = "team_id"
-	keyChannelId   = "channel_id"
+	keyChannelID   = "channel_id"
 	keyChannelName = "channel_name"
 	keyUserID      = "user_id"
 	keyUserName    = "user_name"
 	keyCommand     = "command"
 	keyText        = "text"
+	slackchannel   = "@ali"
 )
 
 type slackMsg struct {
-	Text     string `json:"text"`
-	Username string `json:"username"` // Anonymous animal sender
-	Channel  string `json:"channel"`  // Recipient
+	Text      string `json:"text"`
+	Username  string `json:"username"`
+	Channel   string `json:"channel"` // Recipient
+	AsUser    string `json:"as_user"`
+	IconURL   string `json:"icon_url"`
+	LinkNames string `json:"link_names"`
 }
 
 var (
-	port int
-	// Random animals cribbed from Google Drive's "Anonymous [Animal]" notifications
-	animals = []string{
-		"alligator", "anteater", "armadillo", "auroch", "axolotl", "badger", "bat", "beaver", "buffalo",
-		"camel", "chameleon", "cheetah", "chipmunk", "chinchilla", "chupacabra", "cormorant", "coyote",
-		"crow", "dingo", "dinosaur", "dolphin", "duck", "elephant", "ferret", "fox", "frog", "giraffe",
-		"gopher", "grizzly", "hedgehog", "hippo", "hyena", "jackal", "ibex", "ifrit", "iguana", "koala",
-		"kraken", "lemur", "leopard", "liger", "llama", "manatee", "mink", "monkey", "narwhal", "nyan cat",
-		"orangutan", "otter", "panda", "penguin", "platypus", "python", "pumpkin", "quagga", "rabbit", "raccoon",
-		"rhino", "sheep", "shrew", "skunk", "slow loris", "squirrel", "turtle", "walrus", "wolf", "wolverine", "wombat",
-	}
-	// Username must be first.
-	payloadExp = regexp.MustCompile(`([@#][^\s]+):?(.*)`)
+	port      int
+	assassins = make(map[string][]string)
+	icon      string
+	name      string
 )
 
 // readAnonymousMessage parses the username and re-routes
@@ -66,12 +59,8 @@ func readAnonymousMessage(r *http.Request) string {
 		return "Slack bug; inform the team."
 	}
 	msg := strings.TrimSpace(r.Form[keyText][0])
-	matches := payloadExp.FindStringSubmatch(msg)
-	if matches == nil {
-		return "Failed; message should be like: /anon @ashwin hey what's up?"
-	}
-	user := matches[1]
-	msg = strings.TrimSpace(matches[2])
+
+	user := r.Form[keyUserName][0]
 	err = sendAnonymousMessage(user, msg)
 	if err != nil {
 		return "Failed to send message."
@@ -80,23 +69,37 @@ func readAnonymousMessage(r *http.Request) string {
 }
 
 // sendAnonymousMessage uses an incoming hook to Direct Message
-// the given user the message, from a random animal.
+// the given user the message, from the registered assassin
 func sendAnonymousMessage(username, message string) error {
 	url := os.Getenv(webhookConfig)
+
+	if len(assassins[username]) != 0 {
+		icon = assassins[username][1]
+		name = assassins[username][0]
+	} else {
+		icon = "http://i.imgur.com/CyIgnqi.png"
+		name = "Civilian"
+	}
+
+	fmt.Println("%s %s", icon, name)
 	payload, err := json.Marshal(slackMsg{
-		Text:     message,
-		Channel:  username,
-		Username: fmt.Sprintf("an anonymous %s", animals[rand.Intn(len(animals))]),
+		Text:      message,
+		Channel:   slackchannel,
+		AsUser:    "False",
+		IconURL:   icon,
+		LinkNames: "1",
+		Username:  name,
 	})
 	if err != nil {
 		return err
 	}
+
 	_, err = http.Post(url, "application/json", bytes.NewBuffer(payload))
 	return err
 }
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
+	getAssassins()
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		result := readAnonymousMessage(r)
 		fmt.Fprintf(w, result)
@@ -107,4 +110,27 @@ func main() {
 func init() {
 	flag.IntVar(&port, "port", 5000, "HTTP server port")
 	flag.Parse()
+}
+
+// Assassin data structure
+type Assassin struct {
+	Username     string `json:"username"`
+	AssassinName string `json:"assassin_name"`
+	IconURL      string `json:"icon_url"`
+}
+
+func getAssassins() []Assassin {
+	raw, err := ioutil.ReadFile("./assassins.json")
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	var c []Assassin
+	json.Unmarshal(raw, &c)
+	for _, p := range c {
+		fmt.Println(p.Username)
+		assassins[p.Username] = []string{p.AssassinName, p.IconURL}
+	}
+	return c
 }
