@@ -65,7 +65,6 @@ func readAnonymousMessage(r *http.Request) string {
 	if err != nil {
 		return "Failed to send message."
 	}
-	return fmt.Sprintf("Anonymously sent [%s] to %s", msg, user)
 }
 
 // sendAnonymousMessage uses an incoming hook to Direct Message
@@ -77,7 +76,7 @@ func sendAnonymousMessage(username, message string) error {
 		icon = assassins[username][1]
 		name = assassins[username][0]
 	} else {
-		icon = "http://i.imgur.com/CyIgnqi.png"
+		icon = "https://38.media.tumblr.com/avatar_a9b397fda01a_128.png"
 		name = "Civilian"
 	}
 
