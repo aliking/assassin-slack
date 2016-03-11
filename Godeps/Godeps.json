@@ -1,8 +1,5 @@
 {
-	"ImportPath": ".",
+	"ImportPath": "kinginterweb.com/assassin-slack",
 	"GoVersion": "go1.6",
-	"Packages": [
-		"./..."
-	],
 	"Deps": []
 }
