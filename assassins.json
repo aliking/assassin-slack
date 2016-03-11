@@ -32,12 +32,17 @@
   {
     "username": "megan",
     "assassin_name": "Tippy Toe",
-    "icon_url": "https://33.media.tumblr.com/avatar_77956d0eb9cc_128.png"
+    "icon_url": "http://i.imgur.com/vAQDmTY.png"
   },
   {
     "username": "jesse",
     "assassin_name": "No. 3 Killer",
-    "icon_url": "https://files.slack.com/files-pri/T026V01HB-F0S6V7L9X/btk.jpg"
+    "icon_url": "http://i.imgur.com/vhet6bN.jpg"
+  },
+  {
+    "username": "vanessa",
+    "assassin_name": "STR8t4werd",
+    "icon_url": "http://i.imgur.com/rRNDW0z.png"
   },
   {
     "username": "paul",
@@ -47,5 +52,5 @@
   {
     "username": "akshay",
     "assassin_name": "Kraft360",
-    "icon_url": "https://files.slack.com/files-pri/T026V01HB-F0S7A0PSM/kraft360.jpg"
+    "icon_url": "http://i.imgur.com/haGc6U4.jpg"
   }]
