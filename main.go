@@ -24,7 +24,7 @@ const (
 	keyUserName    = "user_name"
 	keyCommand     = "command"
 	keyText        = "text"
-	slackchannel   = "@ali"
+	slackchannel   = "#assassins"
 )
 
 type slackMsg struct {
