@@ -65,6 +65,7 @@ func readAnonymousMessage(r *http.Request) string {
 	if err != nil {
 		return "Failed to send message."
 	}
+	fmt.Printf("%s posted %s", user, msg)
 	return fmt.Sprintf("Posted secretly to %s", slackchannel)
 }
 
